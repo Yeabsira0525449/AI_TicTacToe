@@ -66,13 +66,7 @@ def draw_figures(color=WHITE):
 def mark_square(row, col, player):
     board[row][col] = player
 
-# Check if square is empty
-def available_square(row, col):
-    return board[row][col] == 0
 
-# Check if board is full
-def is_board_full(check_board=board):
-    return not np.any(check_board == 0)
 
 # Get the winning line info
 def get_winning_line(player, check_board=board):
