@@ -66,17 +66,27 @@ def draw_figures(color=WHITE):
 def mark_square(row, col, player):
     board[row][col] = player
 
+# Check if square is empty
+def available_square(row, col):
+    return board[row][col] == 0
 
+# Check if board is full
+def is_board_full(check_board=board):
+    return not np.any(check_board == 0)
 
 # Get the winning line info
 def get_winning_line(player, check_board=board):
     # Vertical
     for col in range(board_cols):
-        return (start, end)
+        if np.all(check_board[:, col] == player):
+            start = (col * square_size + square_size // 2, 0)
+            end = (col * square_size + square_size // 2, height)
+            return (start, end)
     # Horizontal
     for row in range(board_rows):
         if np.all(check_board[row, :] == player):
-           
+            start = (0, row * square_size + square_size // 2)
+            end = (width, row * square_size + square_size // 2)
             return (start, end)
     # Main Diagonal
     if check_board[0][0] == check_board[1][1] == check_board[2][2] == player:
