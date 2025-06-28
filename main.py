@@ -78,15 +78,11 @@ def is_board_full(check_board=board):
 def get_winning_line(player, check_board=board):
     # Vertical
     for col in range(board_cols):
-        if np.all(check_board[:, col] == player):
-            start = (col * square_size + square_size // 2, 0)
-            end = (col * square_size + square_size // 2, height)
-            return (start, end)
+        return (start, end)
     # Horizontal
     for row in range(board_rows):
         if np.all(check_board[row, :] == player):
-            start = (0, row * square_size + square_size // 2)
-            end = (width, row * square_size + square_size // 2)
+           
             return (start, end)
     # Main Diagonal
     if check_board[0][0] == check_board[1][1] == check_board[2][2] == player:
