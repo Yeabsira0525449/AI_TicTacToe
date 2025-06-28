@@ -42,3 +42,23 @@ def draw_figures():
             elif board[row][col] == 2:
                 pygame.draw.line(screen, WHITE, (col * square_size + square_size // 4, row * square_size + square_size // 4), (col * square_size + 3 * square_size // 4, row * square_size + 3 * square_size // 4), cross_width)
                 pygame.draw.line(screen, WHITE, (col * square_size + square_size // 4, row * square_size + 3 * square_size // 4), (col * square_size + 3 * square_size // 4, row * square_size + square_size // 4), cross_width)
+
+
+# Draw O and X
+def draw_figures(color=WHITE):
+    for row in range(board_rows):
+        for col in range(board_cols):
+            if board[row][col] == 1:
+                pygame.draw.circle(screen, color,
+                                   (int(col * square_size + square_size // 2), int(row * square_size + square_size // 2)),
+                                   circle_radius, circle_width)
+            elif board[row][col] == 2:
+                pygame.draw.line(screen, color,
+                                 (col * square_size + square_size // 4, row * square_size + square_size // 4),
+                                 (col * square_size + 3 * square_size // 4, row * square_size + 3 * square_size // 4),
+                                 cross_width)
+                pygame.draw.line(screen, color,
+                                 (col * square_size + square_size // 4, row * square_size + 3 * square_size // 4),
+                                 (col * square_size + 3 * square_size // 4, row * square_size + square_size // 4),
+                                 cross_width)
+
