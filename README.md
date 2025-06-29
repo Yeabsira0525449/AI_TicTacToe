@@ -1,6 +1,6 @@
 <!-- Banner image (optional) -->
 <p align="center">
-  <img src="https://your-image-url.com/banner.png" alt="Tic Tac Toe Banner" width="600"/>
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfgOiNfrg2xea-QJRqhXhuy2x7FLfKRo5c7w&s" alt="Tic Tac Toe Banner" width="600"/>
 </p>
 
 <h1 align="center"> AI Tic Tac Toe </h1>
