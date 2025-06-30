@@ -90,43 +90,46 @@ def get_winning_line(player, check_board=board):
     if check_board[0][2] == check_board[1][1] == check_board[2][0] == player:
         return ((width, button_area), (0, button_area + board_size))
     return None
-#winner checker
 
+#winner checker
 def check_win(player, check_board=board):
     return get_winning_line(player, check_board) is not None
 
 # modified minimax algorithm with alpha beta pruning 
 def minimax_ab(minimax_board, depth, is_maximizing, alpha, beta):
-    if check_win(2, minimax_board):
-        return float('inf') - depth
-    elif check_win(1, minimax_board):
-        return float('-inf') + depth
+    # Base cases: win/loss/draw
+    if check_win(2, minimax_board):  # AI wins
+        return float('inf') - depth  # Prefer faster wins
+    elif check_win(1, minimax_board):  # Human wins
+        return float('-inf') + depth  # Prefer slower losses
     elif is_board_full(minimax_board):
-        return 0
-    if is_maximizing:
+        return 0  # Draw
+    if is_maximizing:  # AI's turn (maximize score)
         max_eval = float('-inf')
         for row in range(board_rows):
             for col in range(board_cols):
                 if minimax_board[row][col] == 0:
-                    minimax_board[row][col] = 2
+                    minimax_board[row][col] = 2  # Temporary AI move
                     eval = minimax_ab(minimax_board, depth + 1, False, alpha, beta)
-                    minimax_board[row][col] = 0
+                    minimax_board[row][col] = 0  # Undo move
                     max_eval = max(max_eval, eval)
-                    alpha = max(alpha, eval)
-                    if beta <= alpha:
+                    alpha = max(alpha, eval)  # Update alpha (best max value)
+                    if beta <= alpha:  # Prune if minimizer's beta <= maximizer's alpha
                         break
         return max_eval
-    else:
+    else:  # Human's turn (minimize score)
         min_eval = float('inf')
         for row in range(board_rows):
             for col in range(board_cols):
                 if minimax_board[row][col] == 0:
-                    minimax_board[row][col] = 1
+                    minimax_board[row][col] = 1  # Temporary human move
                     eval = minimax_ab(minimax_board, depth + 1, True, alpha, beta)
-                    minimax_board[row][col] = 0
+                    minimax_board[row][col] = 0  # Undo move
+                    
                     min_eval = min(min_eval, eval)
-                    beta = min(beta, eval)
-                    if beta <= alpha:
+                    beta = min(beta, eval)  # Update beta (best min value)
+                    if beta <= alpha:  # Prune if minimizer's beta <= maximizer's alpha
                         break
         return min_eval
+
     
