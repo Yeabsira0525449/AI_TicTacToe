@@ -31,9 +31,9 @@ cross_width = 15
 # Button properties
 button_radius = 20
 button_center = (width // 2, button_area // 2)
-button_animating = False
+button_animating = False  # Flag for button animation
 button_anim_start = 0
-button_anim_duration = 0.25  # seconds
+button_anim_duration = 0.25  # Duration of animation in seconds
 
 # Screen setup
 screen = pygame.display.set_mode((width, height))
@@ -139,10 +139,13 @@ def draw_refresh_icon(center, radius, color, thickness=3, angle=0):
     pygame.draw.lines(screen, color, True, points, thickness)
 
 def draw_refresh_button(anim_progress=0):
+    # anim_progress: 0 (normal) to 1 (fully animated)
     scale = 1 + 0.15 * anim_progress
     anim_radius = int(button_radius * scale)
+    # Draw button background
     pygame.draw.circle(screen, GRAY, button_center, anim_radius)
     pygame.draw.circle(screen, WHITE, button_center, anim_radius, 2)
+    # Draw refresh icon with animation
     draw_refresh_icon(button_center, anim_radius - 4, BLACK, thickness=3, angle=anim_progress * 360)
     return pygame.Rect(button_center[0] - anim_radius, button_center[1] - anim_radius, anim_radius * 2, anim_radius * 2)
 
@@ -153,15 +156,15 @@ while running:
     draw_lines()
     draw_figures()
     
-    # Draw refresh button
+    # Draw refresh button with animation if active
     if button_animating:
         elapsed_time = (time.time() - button_anim_start) / button_anim_duration
         if elapsed_time < 1:
-            draw_refresh_button(elapsed_time)
+            draw_refresh_button(elapsed_time)  # Animate button
         else:
-            button_animating = False
+            button_animating = False  # Reset animation flag
     else:
-        draw_refresh_button()
+        draw_refresh_button()  # Draw static button
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -169,8 +172,8 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = event.pos
             if mouse_y < button_area:  # Clicked in the button area
-                button_animating = True
-                button_anim_start = time.time()
+                button_animating = True  # Start button animation
+                button_anim_start = time.time()  # Record the start time
             else:
                 row = (mouse_y - button_area) // square_size
                 col = mouse_x // square_size
