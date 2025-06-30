@@ -91,96 +91,45 @@ def get_winning_line(player, check_board=board):
         return ((width, button_area), (0, button_area + board_size))
     return None
 
+#winner checker
 def check_win(player, check_board=board):
     return get_winning_line(player, check_board) is not None
 
+# modified minimax algorithm with alpha beta pruning 
 def minimax_ab(minimax_board, depth, is_maximizing, alpha, beta):
+    # Base cases: win/loss/draw
     if check_win(2, minimax_board):  # AI wins
-        return float('inf') - depth
+        return float('inf') - depth  # Prefer faster wins
     elif check_win(1, minimax_board):  # Human wins
-        return float('-inf') + depth
+        return float('-inf') + depth  # Prefer slower losses
     elif is_board_full(minimax_board):
         return 0  # Draw
-    if is_maximizing:
+    if is_maximizing:  # AI's turn (maximize score)
         max_eval = float('-inf')
         for row in range(board_rows):
             for col in range(board_cols):
                 if minimax_board[row][col] == 0:
-                    minimax_board[row][col] = 2  # AI move
+                    minimax_board[row][col] = 2  # Temporary AI move
                     eval = minimax_ab(minimax_board, depth + 1, False, alpha, beta)
                     minimax_board[row][col] = 0  # Undo move
                     max_eval = max(max_eval, eval)
-                    alpha = max(alpha, eval)
-                    if beta <= alpha:
+                    alpha = max(alpha, eval)  # Update alpha (best max value)
+                    if beta <= alpha:  # Prune if minimizer's beta <= maximizer's alpha
                         break
         return max_eval
-    else:
+    else:  # Human's turn (minimize score)
         min_eval = float('inf')
         for row in range(board_rows):
             for col in range(board_cols):
                 if minimax_board[row][col] == 0:
-                    minimax_board[row][col] = 1  # Human move
+                    minimax_board[row][col] = 1  # Temporary human move
                     eval = minimax_ab(minimax_board, depth + 1, True, alpha, beta)
                     minimax_board[row][col] = 0  # Undo move
+                    
                     min_eval = min(min_eval, eval)
-                    beta = min(beta, eval)
-                    if beta <= alpha:
+                    beta = min(beta, eval)  # Update beta (best min value)
+                    if beta <= alpha:  # Prune if minimizer's beta <= maximizer's alpha
                         break
         return min_eval
 
-def draw_refresh_icon(center, radius, color, thickness=3, angle=0):
-    # Draw a simple refresh icon (circular arrow)
-    points = []
-    for i in range(0, 360, 30):
-        rad = math.radians(i + angle)
-        x = center[0] + radius * math.cos(rad)
-        y = center[1] + radius * math.sin(rad)
-        points.append((x, y))
-    pygame.draw.lines(screen, color, True, points, thickness)
-
-def draw_refresh_button(anim_progress=0):
-    scale = 1 + 0.15 * anim_progress
-    anim_radius = int(button_radius * scale)
-    pygame.draw.circle(screen, GRAY, button_center, anim_radius)
-    pygame.draw.circle(screen, WHITE, button_center, anim_radius, 2)
-    draw_refresh_icon(button_center, anim_radius - 4, BLACK, thickness=3, angle=anim_progress * 360)
-    return pygame.Rect(button_center[0] - anim_radius, button_center[1] - anim_radius, anim_radius * 2, anim_radius * 2)
-
-# Main loop
-running = True
-while running:
-    screen.fill(BLACK)
-    draw_lines()
-    draw_figures()
     
-    # Draw refresh button
-    if button_animating:
-        elapsed_time = (time.time() - button_anim_start) / button_anim_duration
-        if elapsed_time < 1:
-            draw_refresh_button(elapsed_time)
-        else:
-            button_animating = False
-    else:
-        draw_refresh_button()
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = event.pos
-            if mouse_y < button_area:  # Clicked in the button area
-                button_animating = True
-                button_anim_start = time.time()
-            else:
-                row = (mouse_y - button_area) // square_size
-                col = mouse_x // square_size
-                if available_square(row, col):
-                    mark_square(row, col, 1)  # Human player
-                    if not is_board_full():
-                        # AI move (to be implemented)
-                        pass
-
-    pygame.display.flip()
-
-pygame.quit()
-sys.exit()
