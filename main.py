@@ -36,19 +36,42 @@ HIGHLIGHT_COLOR = (100, 100, 120)   # Used to highlight selections or active cel
 
 
 # Board and window dimensions
+
+# The size (width and height) of the square game board area in pixels
 board_size = 400
-button_area = 80  # Height reserved for the button
+
+# Height in pixels reserved for the button area below the game board
+button_area = 80
+
+# Total width of the game window (equal to board size, since it's square)
 width = board_size
+
+# Total height of the game window, including space for the button
 height = board_size + button_area
 
+# Line width in pixels for the grid lines separating the squares
 line_width = 4
+
+# Number of rows and columns in the game board (3x3 grid for Tic-Tac-Toe)
 board_rows = 3
 board_cols = 3
+
+# Size of each square (cell) on the board, assuming all squares are equal
 square_size = board_size // board_cols
+
+# Radius of the circle used to represent player 'O'
+# Slightly smaller than 1/3 of a square to fit nicely
 circle_radius = square_size // 3 - 5
+
+# Thickness of the circle outline
 circle_width = 10
+
+# Thickness of the cross (X) lines
 cross_width = 12
+
+# Thickness of the winning line that highlights the win
 win_line_width = 8
+
 
 # Button properties
 button_radius = 25
