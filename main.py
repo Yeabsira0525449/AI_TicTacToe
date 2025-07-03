@@ -74,11 +74,23 @@ win_line_width = 8
 
 
 # Button properties
+
+# Radius of the circular button (used for rendering size and hit detection)
 button_radius = 25
-button_center = (width - 40, button_area // 2)  # Moved to top-right
+
+# Coordinates of the button's center.
+# Placed near the top-right corner (40px from right edge, vertically centered in button area)
+button_center = (width - 40, button_area // 2)
+
+# Flag indicating whether the button is currently in an animation state
 button_animating = False
+
+# Timestamp when the button animation started (used for calculating animation progress)
 button_anim_start = 0
-button_anim_duration = 0.3  # seconds
+
+# Total duration (in seconds) for the button animation
+button_anim_duration = 0.3
+
 
 # Animation properties
 animation_speed = 0.2  # seconds per animation
