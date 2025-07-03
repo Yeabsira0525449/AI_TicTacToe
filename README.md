@@ -26,12 +26,13 @@ A simple 2-player Tic Tac Toe game with an unbeatable AI opponent built using Py
 
 ---
 
-<h2>How To Play</h2>
-<li>1. Left-click on any square to place your move.</li>
-<li>2. The AI responds immediately.</li>
-<li>3. Game ends when someone wins or the board is full.</li>
-<li>. Press `R` to restart the game.</li>
-
+<h2>🎮 Game Instructions</h2>
+<ul>
+  <li>1. Left-click on any empty square to make your move.</li>
+  <li>2. The AI will make its move right after yours.</li>
+  <li>3. The game ends when there's a winner or the board is full.</li>
+  <li>4. Press <code>R</code> to restart the game anytime.</li>
+</ul>
 
 <h3> Installation Requirements:</h3>
 <li>- Python 3.x</li>
