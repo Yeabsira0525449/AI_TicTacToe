@@ -3,67 +3,109 @@ import pygame
 import numpy as np
 import math
 import time
+from pygame import gfxdraw
 
 pygame.init()
 
 # Colors
 WHITE = (255, 255, 255)
-GRAY = (180, 180, 180)
-RED = (255, 0, 0)
+LIGHT_GRAY = (220, 220, 220)
+DARK_GRAY = (50, 50, 50)
+RED = (255, 87, 87)
+GREEN = (80, 200, 120)
+BLUE = (80, 160, 220)
 BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+YELLOW = (255, 215, 0)
+PURPLE = (150, 120, 220)
+BG_COLOR = (25, 25, 35)
+GRID_COLOR = (60, 60, 80)
+HIGHLIGHT_COLOR = (100, 100, 120)
 
 # Board and window dimensions
-board_size = 300
-button_area = 60  # Height reserved for the button
+board_size = 400
+button_area = 80  # Height reserved for the button
 width = board_size
 height = board_size + button_area
 
-line_width = 5
+line_width = 4
 board_rows = 3
 board_cols = 3
 square_size = board_size // board_cols
-circle_radius = square_size // 3
-circle_width = 15
-cross_width = 15
+circle_radius = square_size // 3 - 5
+circle_width = 10
+cross_width = 12
+win_line_width = 8
 
 # Button properties
-button_radius = 20
-button_center = (width // 2, button_area // 2)
+button_radius = 25
+button_center = (width - 40, button_area // 2)  # Moved to top-right
 button_animating = False
 button_anim_start = 0
-button_anim_duration = 0.25  # seconds
+button_anim_duration = 0.3  # seconds
+
+# Animation properties
+animation_speed = 0.2  # seconds per animation
+hover_radius = 5  # hover effect size
 
 # Screen setup
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Tic Tac Toe')
-screen.fill(BLACK)
+screen = pygame.display.set_mode((width, height), pygame.SCALED)
+pygame.display.set_caption('AI Tic Tac Toe')
+screen.fill(BG_COLOR)
 
 # Game board
 board = np.zeros((board_rows, board_cols))
 
-def draw_lines(color=WHITE):
-    for i in range(1, board_rows):
-        pygame.draw.line(screen, color, (0, button_area + square_size * i), (width, button_area + square_size * i), line_width)
-        pygame.draw.line(screen, color, (square_size * i, button_area), (square_size * i, button_area + board_size), line_width)
+# Fonts
+try:
+    title_font = pygame.font.Font(None, 36)
+    status_font = pygame.font.Font(None, 32)
+    button_font = pygame.font.Font(None, 28)
+except:
+    title_font = pygame.font.SysFont('arial', 36)
+    status_font = pygame.font.SysFont('arial', 32)
+    button_font = pygame.font.SysFont('arial', 28)
 
-def draw_figures(color=WHITE):
+def draw_lines(color=GRID_COLOR):
+    # Draw grid lines with subtle glow
+    for i in range(1, board_rows):
+        pygame.draw.line(screen, color, 
+                        (0, button_area + square_size * i), 
+                        (width, button_area + square_size * i), 
+                        line_width)
+        pygame.draw.line(screen, color, 
+                        (square_size * i, button_area), 
+                        (square_size * i, button_area + board_size), 
+                        line_width)
+
+def draw_figures(color=WHITE, highlight=None):
     for row in range(board_rows):
         for col in range(board_cols):
             center_x = int(col * square_size + square_size // 2)
             center_y = int(row * square_size + square_size // 2 + button_area)
-            if board[row][col] == 1:
-                pygame.draw.circle(screen, color, (center_x, center_y), circle_radius, circle_width)
-            elif board[row][col] == 2:
-                pygame.draw.line(screen, color,
-                    (col * square_size + square_size // 4, row * square_size + square_size // 4 + button_area),
-                    (col * square_size + 3 * square_size // 4, row * square_size + 3 * square_size // 4 + button_area),
-                    cross_width)
-                pygame.draw.line(screen, color,
-                    (col * square_size + square_size // 4, row * square_size + 3 * square_size // 4 + button_area),
-                    (col * square_size + 3 * square_size // 4, row * square_size + square_size // 4 + button_area),
-                    cross_width)
+
+            # Draw hover effect
+            if highlight and highlight == (row, col) and board[row][col] == 0:
+                s = pygame.Surface((square_size-10, square_size-10), pygame.SRCALPHA)
+                s.fill((*color, 20))
+                screen.blit(s, (col*square_size+5, row*square_size+5+button_area))
+
+            if board[row][col] == 1:  # O (circle)
+                # Draw smooth anti-aliased circle
+                gfxdraw.aacircle(screen, center_x, center_y, circle_radius, color)
+                gfxdraw.filled_circle(screen, center_x, center_y, circle_radius, (*color, 50))
+                gfxdraw.aacircle(screen, center_x, center_y, circle_radius - circle_width//2, color)
+
+            elif board[row][col] == 2:  # X (cross)
+                offset = square_size // 3
+                # Draw smooth anti-aliased lines
+                gfxdraw.line(screen, 
+                            center_x - offset, center_y - offset,
+                            center_x + offset, center_y + offset, 
+                            color)
+                gfxdraw.line(screen, 
+                            center_x - offset, center_y + offset,
+                            center_x + offset, center_y - offset, 
+                            color)
 
 def mark_square(row, col, player):
     board[row][col] = player
@@ -146,51 +188,98 @@ def best_move():
     return False
 
 def restart_game():
-    screen.fill(BLACK)
+    screen.fill(BG_COLOR)
     draw_lines()
     for row in range(board_rows):
         for col in range(board_cols):
             board[row][col] = 0
 
+def draw_refresh_button(anim_progress=0):
+    # anim_progress: 0 (normal) to 1 (fully animated)
+    scale = 1 + 0.2 * anim_progress
+    anim_radius = int(button_radius * scale)
+
+    # Button background with gradient effect
+    for i in range(anim_radius, 0, -2):
+        alpha = 100 - int(80 * i / anim_radius)
+        color = (*LIGHT_GRAY, alpha)
+        s = pygame.Surface((i*2, i*2), pygame.SRCALPHA)
+        pygame.draw.circle(s, color, (i, i), i)
+        screen.blit(s, (button_center[0] - i, button_center[1] - i))
+
+    # Draw refresh icon with animation rotation
+    angle = anim_progress * 360
+    draw_refresh_icon(button_center, button_radius - 6, DARK_GRAY, thickness=4, angle=angle)
+
+    return pygame.Rect(button_center[0] - anim_radius, button_center[1] - anim_radius, 
+                      anim_radius * 2, anim_radius * 2)
+
 def draw_refresh_icon(center, radius, color, thickness=3, angle=0):
-    # Draw a sharp refresh icon (arc + arrow)
-    arc_rect = pygame.Rect(center[0] - radius + 2, center[1] - radius + 2, 2 * (radius - 2), 2 * (radius - 2))
+    # Draw a smooth refresh icon (arc + arrow)
+    arc_rect = pygame.Rect(center[0] - radius + 2, center[1] - radius + 2, 
+                          2 * (radius - 2), 2 * (radius - 2))
     start_angle = math.radians(40 + angle)
     end_angle = math.radians(320 + angle)
-    pygame.draw.arc(screen, color, arc_rect, start_angle, end_angle, thickness)
+
+    # Draw anti-aliased arc
+    points = []
+    steps = 30
+    for i in range(steps + 1):
+        angle = start_angle + (end_angle - start_angle) * i / steps
+        x = center[0] + (radius - 2) * math.cos(angle)
+        y = center[1] + (radius - 2) * math.sin(angle)
+        points.append((x, y))
+
+    if len(points) > 1:
+        pygame.draw.aalines(screen, color, False, points, thickness)
+
     # Arrowhead
     arrow_angle = end_angle
     arrow_length = radius * 0.7
     tip = (
         int(center[0] + arrow_length * math.cos(arrow_angle)),
         int(center[1] + arrow_length * math.sin(arrow_angle))
-    )
+        )
     left = (
-        int(tip[0] - 8 * math.cos(arrow_angle - math.pi / 8)),
-        int(tip[1] - 8 * math.sin(arrow_angle - math.pi / 8))
-    )
+        int(tip[0] - 10 * math.cos(arrow_angle - math.pi / 8)),
+        int(tip[1] - 10 * math.sin(arrow_angle - math.pi / 8)))
     right = (
-        int(tip[0] - 8 * math.cos(arrow_angle + math.pi / 8)),
-        int(tip[1] - 8 * math.sin(arrow_angle + math.pi / 8))
-    )
+        int(tip[0] - 10 * math.cos(arrow_angle + math.pi / 8)),
+        int(tip[1] - 10 * math.sin(arrow_angle + math.pi / 8)))
+
     pygame.draw.polygon(screen, color, [tip, left, right])
 
-def draw_refresh_button(anim_progress=0):
-    # anim_progress: 0 (normal) to 1 (fully animated)
-    scale = 1 + 0.15 * anim_progress
-    anim_radius = int(button_radius * scale)
-    # Draw button background
-    pygame.draw.circle(screen, GRAY, button_center, anim_radius)
-    pygame.draw.circle(screen, WHITE, button_center, anim_radius, 2)
-    # Draw crisp refresh icon
-    draw_refresh_icon(button_center, anim_radius - 4, BLACK, thickness=3, angle=anim_progress * 360)
-    return pygame.Rect(button_center[0] - anim_radius, button_center[1] - anim_radius, anim_radius * 2, anim_radius * 2)
+def draw_status_text():
+    if game_over:
+        if winner_line:
+            if winner_color == GREEN:
+                text = "You Win!"
+            else:
+                text = "AI Wins!"
+        else:
+            text = "Game Tied!"
+        text_surface = status_font.render(text, True, winner_color)
+        text_rect = text_surface.get_rect(center=(width//2, button_area//2))
+        screen.blit(text_surface, text_rect)
+    else:
+        turn_text = "Your Turn (X)" if player == 1 else "AI Thinking..."
+        text_surface = status_font.render(turn_text, True, WHITE)
+        text_rect = text_surface.get_rect(center=(width//2, button_area//2))
+        screen.blit(text_surface, text_rect)
 
+def draw_title():
+    title_text = "AI Tic-Tac-Toe"
+    title_surface = title_font.render(title_text, True, YELLOW)
+    title_rect = title_surface.get_rect(center=(width//2, 15))
+    screen.blit(title_surface, title_rect)
+
+# Initial setup
 draw_lines()
-player = 1
+player = 1  # Human is 1 (X), AI is 2 (O)
 game_over = False
 winner_line = None
 winner_color = WHITE
+hover_pos = None
 
 # Animation state
 button_animating = False
@@ -199,12 +288,22 @@ button_anim_start = 0
 clock = pygame.time.Clock()
 
 while True:
+    current_time = time.time()
     anim_progress = 0
     if button_animating:
-        elapsed = time.time() - button_anim_start
+        elapsed = current_time - button_anim_start
         anim_progress = min(1, elapsed / button_anim_duration)
         if elapsed > button_anim_duration:
             button_animating = False
+
+    # Get mouse position for hover effect
+    mouse_pos = pygame.mouse.get_pos()
+    hover_pos = None
+    if not game_over and mouse_pos[1] >= button_area:
+        mouseX = mouse_pos[0] // square_size
+        mouseY = (mouse_pos[1] - button_area) // square_size
+        if 0 <= mouseX < board_cols and 0 <= mouseY < board_rows and available_square(mouseY, mouseX):
+            hover_pos = (mouseY, mouseX)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -214,9 +313,10 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
             button_rect = draw_refresh_button(anim_progress)
+
             if button_rect.collidepoint(mouse_pos):
                 button_animating = True
-                button_anim_start = time.time()
+                button_anim_start = current_time
                 restart_game()
                 game_over = False
                 winner_line = None
@@ -224,37 +324,48 @@ while True:
                 player = 1
                 continue  # Don't process as a board click
 
-            if not game_over:
+            if not game_over and player == 1:  # Only allow human move when it's their turn
                 if mouse_pos[1] >= button_area:
                     mouseX = mouse_pos[0] // square_size
                     mouseY = (mouse_pos[1] - button_area) // square_size
                     if 0 <= mouseX < board_cols and 0 <= mouseY < board_rows:
                         if available_square(mouseY, mouseX):
                             mark_square(mouseY, mouseX, player)
-                            draw_figures()
-                            pygame.display.update()
 
                             if check_win(player):
                                 winner_line = get_winning_line(player)
                                 winner_color = GREEN
                                 game_over = True
-                            else:
-                                player = player % 2 + 1
-                                pygame.time.delay(500)
-                                if not game_over:
-                                    if best_move():
-                                        draw_figures()
-                                        pygame.display.update()
-                                        if check_win(2):
-                                            winner_line = get_winning_line(2)
-                                            winner_color = RED
-                                            game_over = True
-                                        else:
-                                            player = player % 2 + 1
-
-                            if is_board_full() and not game_over:
+                            elif is_board_full():
                                 winner_color = BLUE
                                 game_over = True
+                            else:
+                                player = 2  # Switch to AI turn
+
+                            # Redraw immediately to show human move
+                            screen.fill(BG_COLOR)
+                            draw_lines()
+                            draw_figures(highlight=hover_pos)
+                            draw_status_text()
+                            draw_title()
+                            button_rect = draw_refresh_button(anim_progress)
+                            if winner_line:
+                                pygame.draw.line(screen, winner_color, winner_line[0], winner_line[1], win_line_width)
+                            pygame.display.flip()
+
+                            # AI move
+                            if not game_over and player == 2:
+                                pygame.time.delay(300)  # Small delay for better UX
+                                if best_move():
+                                    if check_win(2):
+                                        winner_line = get_winning_line(2)
+                                        winner_color = RED
+                                        game_over = True
+                                    elif is_board_full():
+                                        winner_color = BLUE
+                                        game_over = True
+                                    else:
+                                        player = 1  # Switch back to human
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
@@ -264,15 +375,18 @@ while True:
                 winner_color = WHITE
                 player = 1
 
-    screen.fill(BLACK)
+    # Main drawing
+    screen.fill(BG_COLOR)
     draw_lines()
-    draw_figures()
-    draw_refresh_button(anim_progress)
+    draw_figures(highlight=hover_pos)
+    draw_status_text()
+    draw_title()
+    button_rect = draw_refresh_button(anim_progress)
 
     if winner_line:
-        pygame.draw.line(screen, winner_color, winner_line[0], winner_line[1], line_width * 2)
+        pygame.draw.line(screen, winner_color, winner_line[0], winner_line[1], win_line_width)
     elif game_over and winner_color == BLUE:
         draw_lines(color=BLUE)
 
-    pygame.display.update()
+    pygame.display.flip()
     clock.tick(60)
