@@ -1,25 +1,39 @@
-import sys
-import pygame
-import numpy as np
-import math
-import time
-from pygame import gfxdraw
+# -------------------------------
+# Import required Python modules
+# -------------------------------
+import sys                      # Provides access to system-specific parameters and functions
+import pygame                   # Used for creating games and graphical programs
+import numpy as np              # For efficient numerical operations and array handling
+import math                     # For mathematical functions
+import time                     # For time-related functions
+from pygame import gfxdraw      # For antialiased drawing of shapes (better visual quality)
 
-pygame.init()
+# ----------------------
+# Initialize Pygame
+# ----------------------
+pygame.init()                   # Initializes all imported Pygame modules
 
-# Colors
-WHITE = (255, 255, 255)
-LIGHT_GRAY = (220, 220, 220)
-DARK_GRAY = (50, 50, 50)
-RED = (255, 87, 87)
-GREEN = (80, 200, 120)
-BLUE = (80, 160, 220)
-BLACK = (0, 0, 0)
-YELLOW = (255, 215, 0)
-PURPLE = (150, 120, 220)
-BG_COLOR = (25, 25, 35)
-GRID_COLOR = (60, 60, 80)
-HIGHLIGHT_COLOR = (100, 100, 120)
+# ----------------------
+# Define color constants
+# ----------------------
+# These RGB color tuples are used for consistent and easy-to-read color references 
+# throughout the visual interface or game
+
+WHITE = (255, 255, 255)             # Basic white
+LIGHT_GRAY = (220, 220, 220)        # Light gray for soft UI elements
+DARK_GRAY = (50, 50, 50)            # Dark gray for contrasting backgrounds or text
+RED = (255, 87, 87)                 # Vibrant red, good for highlighting errors or important elements
+GREEN = (80, 200, 120)              # Soft green for success indicators or active states
+BLUE = (80, 160, 220)               # Calm blue for general UI or selection
+BLACK = (0, 0, 0)                   # Standard black
+YELLOW = (255, 215, 0)              # Bright yellow for warnings or alerts
+PURPLE = (150, 120, 220)            # Purple for decorative or alternative highlights
+
+# Specialized theme colors for UI
+BG_COLOR = (25, 25, 35)             # Dark background color for modern UI look
+GRID_COLOR = (60, 60, 80)           # Color used for drawing grid lines or guides
+HIGHLIGHT_COLOR = (100, 100, 120)   # Used to highlight selections or active cells
+
 
 # Board and window dimensions
 board_size = 400
